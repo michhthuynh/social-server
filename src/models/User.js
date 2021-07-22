@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
     type: Number,
     enum: [1, 2, 3],
   },
+  date_of_birth: {
+    type: String
+  },
   profilePicture: {
     type: String,
     default: "",
@@ -66,5 +69,5 @@ const userSchema = new mongoose.Schema({
   { timestamps: true }
 )
 
-const UserModel = mongoose.model(userSchema)
+const UserModel = mongoose.model('Users', userSchema)
 module.exports = UserModel

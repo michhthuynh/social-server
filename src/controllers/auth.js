@@ -1,7 +1,114 @@
-module.exports.login = (req, res) => {
-  res.sendStatus(200)
+const UserModel = require("../models/User")
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+
+module.exports.login = async (req, res) => {
+  const { email, password } = req.body
+
+  const user = await UserModel.find({ email: email });
+  if (!user[0]) {
+    res.status(400).json({
+      message: 'Email does not register'
+    });
+    return;
+  }
+
+  const match = await bcrypt.compare(password, user[0]['password'])
+
+  if (!match) {
+    res.status(401).json({
+      message: 'Wrong password.'
+    })
+    return;
+  }
+
+  // register token
+  console.log('Verify account successfully')
+  jwt.sign({ email }, process.env.SECRET_TOKEN, { expiresIn: '24h' }, (err, token) => {
+    if (err) {
+      console.log(err.message)
+      res.sendStatus(503)
+      return
+    }
+    res.status(200).json({
+      id: user[0].email,
+      token
+    })
+    return
+  })
 }
 
-module.exports.register = (req, res) => {
-  res.send('Hello')
+module.exports.register = async (req, res) => {
+  try {
+    const { firstName, lastName, email, password, gender, age, profilePicture, coverPicture, city, from, relationship } = req.body
+
+    // check firstName and lastName is valid
+    const pattern = /^([^0-9]*)$/
+    if (!pattern.test(firstName)) {
+      res.status(400).json({
+        msg: 'First name shouldn\'t have number'
+      })
+      return
+    }
+
+    if (!pattern.test(lastName)) {
+      res.status(400).json({
+        msg: 'Last name shouldn\'t have number'
+      })
+      return
+    }
+
+    // Check gender is enum
+    const genderEnum = [1, 2, 3]
+    if (!genderEnum.includes(gender)) {
+      res.status(400).json({
+        msg: 'Gender invalid'
+      })
+      return
+    }
+
+    const hasEmail = await UserModel.find({ email: email })
+    if (hasEmail.length !== 0) {
+      res.status(400).json({
+        msg: 'Email is exist. Please use another email'
+      })
+      return
+    }
+    const hashPassword = await bcrypt.hash(password, 10)
+
+    const user = await UserModel.create({
+      firstName,
+      lastName,
+      email,
+      password: hashPassword,
+      age: age || null,
+      gender: gender,
+      profilePicture,
+      coverPicture,
+      city,
+      from,
+      relationship: relationship || 3,
+    })
+
+    if (user) {
+      jwt.sign({ email }, process.env.SECRET_TOKEN, { expiresIn: '24h' }, (err, token) => {
+        if (err) {
+          console.log(err.message)
+          res.sendStatus(503)
+          return
+        }
+        console.log("Create token: ", user.id)
+        res.json({
+          id: user.id,
+          token
+        })
+        return
+      })
+    }
+
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(503)
+    return
+  }
 }

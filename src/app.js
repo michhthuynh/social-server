@@ -4,8 +4,11 @@ const app = express()
 const cors = require('cors')
 require('./utils/connectMongodb')()
 const router = require('./routes')
+const logging = require('morgan')
+require('dotenv').config()
 
 
+app.use(logging('tiny'))
 app.use(cors())
 app.use(express.json())
 

@@ -12,10 +12,12 @@ router.post('/login',
 )
 
 router.post('/register',
-  body('email').isEmail(),
-  body('password').isLength({ min: 9, max: 20 }),
+  body('firstName').isString().isLength({ min: 5, max: 50 }),
+  body('firstName').isString().isLength({ min: 5, max: 50 }),
+  body('email').isString().isEmail(),
+  body('password').isString().isLength({ min: 9, max: 20 }),
   validate,
-  login
+  register
 )
 
 
