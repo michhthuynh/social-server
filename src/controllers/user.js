@@ -3,20 +3,8 @@ const bcrypt = require('bcrypt')
 
 
 
-function checkTokenValid(email, res) {
-  if (res.locals.email !== email) {
-    res.status(401).json({
-      msg: 'Token invalid'
-    })
-    return false
-  }
-  return true
-}
-
 module.exports.changePassword = async (req, res) => {
   const { password, pre_password, old_password, email } = req.body
-  //Check token invalid
-  if (!checkTokenValid(email, res)) return
 
   try {
     const user = await UserModel.find({ email: email });
@@ -62,7 +50,6 @@ module.exports.changeField = async (req, res) => {
   const { value, email } = req.body
   const field = req.params.field
   const fieldList = ['firstName', 'lastName', 'year_of_birth', 'profilePicture', 'coverPicture', 'city', 'from']
-  if (!checkTokenValid(email, res)) return
   if (!fieldList.includes(field)) {
     res.status(400).json({
       msg: 'No field is matching'
@@ -90,5 +77,61 @@ module.exports.changeField = async (req, res) => {
   }
 }
 
-// TODO: changeGender function [1,2,3]
-// TODO: changeRelationships function [1,2,3]
+module.exports.changeGender = async (req, res) => {
+  const { email, value } = req.body
+
+  //Check gender valid
+  const genderEnum = [1, 2, 3]
+  if (!genderEnum.includes(value)) {
+    res.status(400).json({
+      msg: 'Gender param invalid'
+    })
+    return
+  }
+
+  try {
+    const result = await UserModel.updateOne({ email: email }, { gender: value })
+    if (result.nModified === 1) {
+      res.json({
+        msg: 'Gender field was updated successfully'
+      })
+      return
+    }
+    res.sendStatus(503)
+  } catch (error) {
+    console.error(`Change gender error: ${error}`)
+    res.sendStatus(503)
+  }
+}
+
+module.exports.changeRelationship = async (req, res) => {
+  const { email, value } = req.body
+
+  //Check relationship valid
+  const relationshipEnum = [1, 2, 3]
+  if (!relationshipEnum.includes(value)) {
+    res.status(400).json({
+      msg: 'Relationship param invalid'
+    })
+    return
+  }
+
+  try {
+    const result = await UserModel.updateOne({ email: email }, { relationship: value })
+    if (result.nModified === 1) {
+      res.json({
+        msg: 'Relationship was updated successfully'
+      })
+      return
+    }
+    res.sendStatus(503)
+  } catch (error) {
+    console.error(`Change relationship error: ${error}`)
+    res.sendStatus(503)
+  }
+}
+
+//TODO: remove User
+module.exports.removeUser = async (req, res) => {
+
+}
