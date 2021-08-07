@@ -35,7 +35,7 @@ module.exports.login = async (req, res) => {
         return;
       }
       res.status(200).json({
-        id: user[0].email,
+        id: user[0]._id,
         token,
       });
       return;
@@ -116,6 +116,7 @@ module.exports.register = async (req, res) => {
     if (user) {
       console.log(`Created database: ${user.id}`);
       res.status(201).json({
+        id: user.id,
         firstName,
         lastName,
         email: email,

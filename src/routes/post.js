@@ -1,19 +1,12 @@
-const { body } = require('express-validator')
-const { checkTokenValid } = require('../middleware/checkTokenValid')
-const { validate } = require('../middleware/validate')
+const { body } = require('express-validator');
+const { validate } = require('../middleware/routing/validate');
 
-const router = require('express').Router()
+const router = require('express').Router();
 
 // create post
-router.post('/',
-  body('email').isString().isEmail(),
-  body('description').isString().isLength({ min: 1 }),
-  validate,
-  checkTokenValid,
-
-)
+router.post('/', body('description').isString().isLength({ min: 1 }), validate);
 // change content
 // change reaction
 // add images
 
-module.exports = router
+module.exports = router;

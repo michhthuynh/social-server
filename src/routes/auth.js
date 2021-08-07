@@ -1,25 +1,25 @@
-const { body } = require('express-validator')
-const { login, register } = require('../controllers/auth')
-const { validate } = require('../middleware/validate')
+const { body } = require('express-validator');
+const { login, register } = require('../controllers/AuthController');
+const { validate } = require('../middleware/routing/validate');
 
-const router = require('express').Router()
+const router = require('express').Router();
 
-router.post('/login',
+router.post(
+  '/login',
   body('email').isEmail(),
   body('password').isLength({ min: 9, max: 20 }),
   validate,
-  login
-)
+  login,
+);
 
-router.post('/register',
+router.post(
+  '/register',
   body('firstName').isString().isLength({ min: 5, max: 50 }),
   body('firstName').isString().isLength({ min: 5, max: 50 }),
   body('email').isString().isEmail(),
   body('password').isString().isLength({ min: 9, max: 20 }),
   validate,
-  register
-)
+  register,
+);
 
-
-
-module.exports = router
+module.exports = router;
