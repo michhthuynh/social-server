@@ -2,11 +2,10 @@ const PORT = process.env.PORT || 5000
 const express = require('express')
 const app = express()
 const cors = require('cors')
-require('./utils/connectMongodb')()
+require('dotenv').config()
 const router = require('./routes')
 const logging = require('morgan')
-require('dotenv').config()
-
+require('./utils/connectMongodb')()
 
 app.use(logging('tiny'))
 app.use(cors())

@@ -39,34 +39,33 @@ module.exports.login = async (req, res) => {
 }
 
 module.exports.register = async (req, res) => {
+  const { firstName, lastName, email, password, gender, age, profilePicture, coverPicture, city, from, relationship } = req.body
+  // check firstName and lastName is valid
+  const pattern = /^([^0-9]*)$/
+  if (!pattern.test(firstName)) {
+    res.status(400).json({
+      msg: 'First name shouldn\'t have number'
+    })
+    return
+  }
+
+  if (!pattern.test(lastName)) {
+    res.status(400).json({
+      msg: 'Last name shouldn\'t have number'
+    })
+    return
+  }
+
+  // Check gender is enum
+  const genderEnum = [1, 2, 3]
+  if (!genderEnum.includes(gender)) {
+    res.status(400).json({
+      msg: 'Gender invalid'
+    })
+    return
+  }
+
   try {
-    const { firstName, lastName, email, password, gender, age, profilePicture, coverPicture, city, from, relationship } = req.body
-
-    // check firstName and lastName is valid
-    const pattern = /^([^0-9]*)$/
-    if (!pattern.test(firstName)) {
-      res.status(400).json({
-        msg: 'First name shouldn\'t have number'
-      })
-      return
-    }
-
-    if (!pattern.test(lastName)) {
-      res.status(400).json({
-        msg: 'Last name shouldn\'t have number'
-      })
-      return
-    }
-
-    // Check gender is enum
-    const genderEnum = [1, 2, 3]
-    if (!genderEnum.includes(gender)) {
-      res.status(400).json({
-        msg: 'Gender invalid'
-      })
-      return
-    }
-
     const hasEmail = await UserModel.find({ email: email })
     if (hasEmail.length !== 0) {
       res.status(400).json({
@@ -74,8 +73,15 @@ module.exports.register = async (req, res) => {
       })
       return
     }
-    const hashPassword = await bcrypt.hash(password, 10)
+  } catch (error) {
+    console.log('Cannot connect to database:')
+    console.log(error)
+    res.sendStatus(503)
+    return
+  }
 
+  try {
+    const hashPassword = await bcrypt.hash(password, 10)
     const user = await UserModel.create({
       firstName,
       lastName,
@@ -89,23 +95,24 @@ module.exports.register = async (req, res) => {
       from,
       relationship: relationship || 3,
     })
-
     if (user) {
-      jwt.sign({ email }, process.env.SECRET_TOKEN, { expiresIn: '24h' }, (err, token) => {
-        if (err) {
-          console.log(err.message)
-          res.sendStatus(503)
-          return
-        }
-        console.log("Create token: ", user.id)
-        res.json({
-          id: user.id,
-          token
-        })
-        return
+      console.log(`Created database: ${user.id}`)
+      res.status(201).json({
+        firstName,
+        lastName,
+        email: email,
+        age: age || null,
+        gender: gender,
+        profilePicture,
+        coverPicture,
+        city,
+        from,
       })
+    } else {
+      console.log(`Cannot create account: ${email}`)
+      res.sendStatus(400)
+      return
     }
-
   } catch (error) {
     console.log(error)
     res.sendStatus(503)

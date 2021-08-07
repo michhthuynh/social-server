@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 
 const optionMongoose = { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true };
 const connectMongodb = () => {
-  const urlMongoData = `mongodb://localhost:27017/social_network`
+  const urlMongoData = `mongodb+srv://${process.env.MONGO_DATABASE_USERNAME}:${process.env.MONGO_DATABASE_PASSWORD}@social-network.5ndmp.mongodb.net/social-network`
   console.log(`Connecting to database...`)
   mongoose.connect(urlMongoData, optionMongoose)
     .then(() => {
